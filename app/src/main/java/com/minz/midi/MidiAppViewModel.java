@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class NsdHelper extends AndroidViewModel {
+public class MidiAppViewModel extends AndroidViewModel {
     NsdManager mNsdManager;
     NsdManager.DiscoveryListener mDiscoveryListener;
     NsdManager.RegistrationListener mRegistrationListener;
@@ -67,7 +67,7 @@ public class NsdHelper extends AndroidViewModel {
     MIDISessionControlPort mMidiSessionControlPort;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public NsdHelper(@NonNull Application application) {
+    public MidiAppViewModel(@NonNull Application application) {
         super(application);
         mNsdManager = (NsdManager) application.getApplicationContext().getSystemService(Context.NSD_SERVICE);
         services = new ArrayList();
@@ -205,21 +205,19 @@ public class NsdHelper extends AndroidViewModel {
         };
     }
     public void registerService(String serviceName, int port) {
-        tearDown();  // Cancel any previous registration request
+        tearDown();
         mServiceName = serviceName;
         initializeRegistrationListener();
         NsdServiceInfo serviceInfo  = new NsdServiceInfo();
         serviceInfo.setPort(port);
         serviceInfo.setServiceName(mServiceName);
         serviceInfo.setServiceType(SERVICE_TYPE);
-        mNsdManager.registerService(
-                serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+        mNsdManager.registerService(serviceInfo, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
     }
     public void discoverServices() {
-        stopDiscovery();  // Cancel any existing discovery request
+        stopDiscovery();
         initializeDiscoveryListener();
-        mNsdManager.discoverServices(
-                SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
+        mNsdManager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
     }
     public void stopDiscovery() {
         if (mDiscoveryListener != null) {
@@ -331,13 +329,6 @@ public class NsdHelper extends AndroidViewModel {
                             public void onSend(byte[] data, int offset,
                                                int count, long timestamp) throws IOException {
 
-                                StringBuilder sb = new StringBuilder();
-                                sb.append("[ ");
-                                for (int i = offset; i < offset + count; ++i) {
-                                    sb.append(String.format("0x%02X ", data[i]));
-                                }
-                                sb.append("]");
-                                Log.d(" Midiout", "timestamp: " + timestamp + " offset: " + offset + "count: " + count + "data: " + sb.toString());
                                 processMidiData(data, offset, count);
 
                             }
